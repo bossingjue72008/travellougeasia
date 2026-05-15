@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Travelauogue</title>
+
+<style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --accent:#2563eb;
+}
+
+body.dark{
+  --bg:#0f172a;
+  --card:#111827;
+  --text:#f9fafb;
+  --muted:#9ca3af;
+  --accent:#60a5fa;
+}
+
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:0.3s;
+}
+
+/* TOPBAR */
+.topbar{
+  position:sticky;
+  top:0;
+  background:var(--card);
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo{
+  font-size:20px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.search{
+  width:40%;
+  padding:10px;
+  border-radius:20px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+.btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:var(--accent);
+  color:white;
+}
+
+/* HERO */
+.hero{
+  padding:40px;
+  text-align:center;
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  color:white;
+}
+
+/* GRID */
+.grid{
+  width:90%;
+  margin:20px auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 10px 20px rgba(0,0,0,0.08);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+}
+
+.card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+}
+
+.card-content{
+  padding:12px;
+}
+
+.tag{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.small{
+  font-size:12px;
+  cursor:pointer;
+  color:var(--accent);
+}
+
+/* DETAIL PAGE */
+.page{
+  width:90%;
+  margin:20px auto;
+  display:none;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;
+}
+
+.gallery img{
+  width:100%;
+  height:160px;
+  border-radius:12px;
+  object-fit:cover;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  background:var(--accent);
+  color:white;
+  border-radius:20px;
+  font-size:12px;
+  margin-top:10px;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:30px;
+  color:var(--muted);
+  margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="logo">🌍 Travelauogue</div>
+
+  <input class="search" id="search" placeholder="Search countries..." onkeyup="renderHome()">
+
+  <button class="btn" onclick="toggleMode()">🌙</button>
+</div>
+
+<div class="hero" id="homeHero">
+  <h1>Explore the World in One Place ✈️</h1>
+  <p>Premium travel catalogue of beautiful destinations</p>
+</div>
+
+<!-- HOME -->
+<div class="grid" id="home"></div>
+
+<!-- DETAIL PAGE -->
+<div class="page" id="page"></div>
+
+<footer>
+  <p>Travelauogue © 2026 — Explore the world beautifully 🌍</p>
+</footer>
+
+<script>
+
+let favorites = JSON.parse(localStorage.getItem("fav")) || [];
+
+const countries = [
+{
+id:"japan",
+name:"Japan",
+img:"https://images.unsplash.com/photo-1549693578-d683be217e58",
+desc:"Land of temples, neon cities and mountains",
+places:[
+"Mount Fuji","Kyoto Temples","Shibuya Crossing","Osaka Castle","Nara Park"
+],
+gallery:[
+"https://images.unsplash.com/photo-1526481280698-8fcc13fd0c50",
+"https://images.unsplash.com/photo-1505060894630-3c18f0c8f7d3",
+"https://images.unsplash.com/photo-1542051841857-5f90071e7989"
+]
+},
+
+{
+id:"philippines",
+name:"Philippines",
+img:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+desc:"Tropical paradise with stunning islands",
+places:[
+"Palawan Lagoons","Boracay Beach","Siargao Waves","Batanes Hills","Chocolate Hills"
+],
+gallery:[
+"https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b",
+"https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86",
+"https://images.unsplash.com/photo-1583337130417-3346a1be7dee"
+]
+},
+
+{
+id:"france",
+name:"France",
+img:"https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+desc:"City of art, romance and culture",
+places:[
+"Eiffel Tower","Louvre Museum","Nice Riviera","Mont Saint-Michel","Loire Valley"
+],
+gallery:[
+"https://images.unsplash.com/photo-1522093007474-d86e9bf7ba6f",
+"https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+"https://images.unsplash.com/photo-1566139885746-3a8f3c8c6c45"
+]
+}
+];
+
+function renderHome(){
+let q = document.getElementById("search").value.toLowerCase();
+let home = document.getElementById("home");
+home.innerHTML="";
+
+countries
+.filter(c=>c.name.toLowerCase().includes(q))
+.forEach(c=>{
+
+let fav = favorites.includes(c.id);
+
+let div = document.createElement("div");
+div.className="card";
+
+div.innerHTML=`
+<img src="${c.img}">
+<div class="card-content">
+<h3>${c.name}</h3>
+<div class="tag">${c.desc}</div>
+
+<div class="actions">
+<span class="small" onclick="openPage('${c.id}')">Explore Now →</span>
+<span class="small" onclick="saveFav('${c.id}')">${fav?"❤️ Saved":"🤍 Save"}</span>
+</div>
+</div>
+`;
+
+home.appendChild(div);
+});
+}
+
+function openPage(id){
+let c = countries.find(x=>x.id===id);
+
+document.getElementById("home").style.display="none";
+document.getElementById("homeHero").style.display="none";
+
+let page = document.getElementById("page");
+page.style.display="block";
+
+page.innerHTML=`
+<h1>${c.name}</h1>
+<div class="badge">${c.desc}</div>
+
+<h3>Top Places</h3>
+<ul>
+${c.places.map(p=>`<li>${p}</li>`).join("")}
+</ul>
+
+<h3>Gallery</h3>
+<div class="gallery">
+${c.gallery.map(g=>`<img src="${g}">`).join("")}
+</div>
+
+<br>
+<button class="btn" onclick="back()">← Back</button>
+`;
+}
+
+function back(){
+document.getElementById("home").style.display="grid";
+document.getElementById("homeHero").style.display="block";
+document.getElementById("page").style.display="none";
+}
+
+function saveFav(id){
+if(favorites.includes(id)){
+favorites = favorites.filter(x=>x!==id);
+}else{
+favorites.push(id);
+}
+localStorage.setItem("fav",JSON.stringify(favorites));
+renderHome();
+}
+
+function toggleMode(){
+document.body.classList.toggle("dark");
+}
+
+renderHome();
+
+</script>
+
+</body>
+</html>
